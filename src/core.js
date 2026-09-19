@@ -373,9 +373,10 @@ export function formatJalaliDate(date) {
 
 /**
  * بررسی کبیسه بودن سال شمسی.
+ * توجه: در jalaali-js، مقدار leap صفر یعنی سال کبیسه.
  */
 export function isJalaliLeap(jy) {
-  return jalCal(jy).leap !== 0;
+  return jalCal(jy).leap === 0;
 }
 
 // ===== بخش ۱۰: jalali — تست‌های خودکار =====
