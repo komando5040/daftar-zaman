@@ -1,0 +1,306 @@
+/* ============================================================
+   فایل: src/styles.css
+   فهرست:
+     بخش ۱: متغیرهای روشن
+     بخش ۲: متغیرهای تیره
+     بخش ۳: ریست و پایه
+     بخش ۴: چیدمان
+     بخش ۵: نوار پایین
+     بخش ۶: دکمه‌ها و ورودی‌ها
+     بخش ۷: توست
+     بخش ۸: Sheet
+     بخش ۹: تست‌ها و لاگ
+   ============================================================ */
+
+/* ===== بخش ۱: متغیرهای روشن ===== */
+:root {
+  --bg: #F5F7FA;
+  --fg: #1A1F27;
+  --fg-muted: #5B6472;
+  --card: #FFFFFF;
+  --border: #E3E7EE;
+  --nav-bg: #FFFFFF;
+  --chip: #EDF1F7;
+  --accent: #1565C0;
+  --danger: #C62828;
+  --success: #2E7D32;
+  --overlay: rgba(0, 0, 0, 0.45);
+}
+
+/* ===== بخش ۲: متغیرهای تیره ===== */
+html[data-theme="dark"] {
+  --bg: #0F1720;
+  --fg: #E9EDF2;
+  --fg-muted: #9AA6B4;
+  --card: #1A2330;
+  --border: #2A3644;
+  --nav-bg: #121A24;
+  --chip: #22303F;
+  --accent: #64B5F6;
+  --danger: #EF5350;
+  --success: #66BB6A;
+  --overlay: rgba(0, 0, 0, 0.65);
+}
+
+/* ===== بخش ۳: ریست و پایه ===== */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  background: var(--bg);
+  color: var(--fg);
+  min-height: 100%;
+}
+
+body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: contain;
+}
+
+h1, h2, h3, h4 { margin: 0 0 8px; font-weight: 600; }
+p { margin: 0 0 8px; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+
+/* ===== بخش ۴: چیدمان ===== */
+.app {
+  padding: 12px 12px calc(84px + env(safe-area-inset-bottom));
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100vh;
+}
+
+.page-header {
+  padding: 8px 4px 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.page-title { font-size: 22px; font-weight: 700; }
+.page-subtitle { color: var(--fg-muted); font-size: 14px; }
+
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  padding: 14px;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+}
+
+.card-title {
+  font-size: 15px;
+  color: var(--fg-muted);
+  margin-bottom: 10px;
+  font-weight: 600;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+.row:last-child { border-bottom: none; }
+
+.row-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+.muted { color: var(--fg-muted); font-size: 14px; }
+.num { font-variant-numeric: tabular-nums; }
+
+.badge {
+  background: var(--chip);
+  border-radius: 10px;
+  padding: 3px 10px;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+/* ===== بخش ۵: نوار پایین ===== */
+.bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  background: var(--nav-bg);
+  border-top: 1px solid var(--border);
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 50;
+}
+
+.bottom-nav a {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 56px;
+  color: var(--fg-muted);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+.bottom-nav a.active { color: var(--accent); }
+.nav-icon { font-size: 20px; }
+
+/* ===== بخش ۶: دکمه‌ها و ورودی‌ها ===== */
+.btn {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  font-weight: 500;
+}
+.btn:active { transform: scale(0.98); }
+.btn-danger { color: var(--danger); border-color: var(--danger); }
+
+.input, .select {
+  min-height: 44px;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--fg);
+  min-width: 96px;
+  text-align: center;
+}
+
+/* ===== بخش ۷: توست ===== */
+#toast-root {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.toast {
+  background: #263238;
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transform: translateY(20px);
+  opacity: 0;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+  pointer-events: auto;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+}
+
+html[data-theme="dark"] .toast { background: #37474F; }
+.toast-show { transform: translateY(0); opacity: 1; }
+.toast-text { flex: 1; }
+.toast-action {
+  background: transparent;
+  border: none;
+  color: #64B5F6;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: 8px;
+}
+
+/* ===== بخش ۸: Sheet ===== */
+#sheet-root { position: relative; z-index: 200; }
+
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  background: var(--overlay);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.sheet-overlay.sheet-show { opacity: 1; }
+
+.sheet {
+  background: var(--card);
+  color: var(--fg);
+  width: 100%;
+  max-width: 640px;
+  border-radius: 18px 18px 0 0;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom);
+  transform: translateY(20px);
+  transition: transform 0.2s ease;
+}
+
+.sheet-overlay.sheet-show .sheet { transform: translateY(0); }
+
+.sheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.sheet-title { margin: 0; font-size: 17px; font-weight: 700; }
+.sheet-close {
+  background: transparent;
+  border: none;
+  font-size: 20px;
+  min-width: 44px;
+  min-height: 44px;
+  color: var(--fg-muted);
+}
+.sheet-body {
+  padding: 14px 16px 20px;
+  overflow-y: auto;
+}
+
+/* ===== بخش ۹: تست‌ها و لاگ ===== */
+.test-results { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.test-row {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font-size: 13px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: var(--chip);
+}
+.test-row.pass { color: var(--success); }
+.test-row.fail { color: var(--danger); }
+.test-name { flex: 1; }
+.test-detail { color: var(--fg-muted); font-size: 12px; }
+
+.log-box {
+  max-height: 260px;
+  overflow: auto;
+  background: var(--chip);
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 12px;
+  font-family: ui-monospace, monospace;
+}
+.log-row { display: flex; gap: 8px; padding: 3px 0; border-bottom: 1px dashed var(--border); }
+.log-time { color: var(--fg-muted); white-space: nowrap; }
+.log-msg { word-break: break-word; }
+
+.loading, .error-box {
+  text-align: center;
+  color: var(--fg-muted);
+  padding: 40px 0;
+}
+.error-box { color: var(--danger); }
