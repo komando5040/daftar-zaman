@@ -54,6 +54,17 @@ async function navigate() {
 }
 
 // ===== بخش ۴: Service Worker و به‌روزرسانی =====
+function attachToWorker(worker) {
+  if (!worker) return;
+  worker.addEventListener('statechange', () => {
+    if (worker.state === 'installed' && navigator.serviceWorker.controller) {
+      notifyUpdateAvailable(worker);
+    } else if (worker.state === 'redundant') {
+      logError('SW نصب نشد (redundant). احتمالاً یک فایل در ASSETS موجود نیست.');
+    }
+  });
+}
+
 function setupServiceWorker() {
   if (!('serviceWorker' in navigator)) {
     logError('مرورگر از Service Worker پشتیبانی نمی‌کند.');
@@ -62,26 +73,31 @@ function setupServiceWorker() {
 
   const doRegister = async () => {
     try {
-      const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+      // نکته کلیدی: updateViaCache: 'none' یعنی برای sw.js هرگز از کش HTTP استفاده نکن.
+      // این باعث می‌شود بعد از هر Commit، به‌روزرسانی بلافاصله دیده شود.
+      const reg = await navigator.serviceWorker.register('./sw.js', {
+        scope: './',
+        updateViaCache: 'none'
+      });
 
+      // اگر نصب جدیدی در حال انجام است، وصل شو (حتی قبل از updatefound).
+      attachToWorker(reg.installing);
+
+      // اگر نسخه‌ای در انتظار تأیید است، به کاربر اطلاع بده.
       if (reg.waiting && navigator.serviceWorker.controller) {
         notifyUpdateAvailable(reg.waiting);
       }
 
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        if (!newWorker) return;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            notifyUpdateAvailable(newWorker);
-          } else if (newWorker.state === 'redundant') {
-            logError('SW نصب نشد (redundant). احتمالاً یک فایل در ASSETS موجود نیست.');
-          }
-        });
-      });
+      // رویداد استاندارد.
+      reg.addEventListener('updatefound', () => attachToWorker(reg.installing));
 
+      // خطای احتمالی هنگام ثبت.
       reg.onerror = (e) => logError('خطای SW: ' + (e?.message || ''));
 
+      // فوراً یک چک دستی هم انجام بده (با احترام به updateViaCache: 'none').
+      try { await reg.update(); } catch (_) {}
+
+      // بعد از فعال‌سازی SW جدید، صفحه یک‌بار reload شود.
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (refreshing) return;
@@ -93,7 +109,6 @@ function setupServiceWorker() {
     }
   };
 
-  // اگر صفحه قبلاً کاملاً بارگذاری شده، فوراً ثبت کن؛ وگرنه منتظر load بمان.
   if (document.readyState === 'complete') {
     doRegister();
   } else {
@@ -104,7 +119,7 @@ function setupServiceWorker() {
 function notifyUpdateAvailable(worker) {
   showToast('نسخه جدید آماده است.', {
     actionLabel: 'به‌روزرسانی',
-    duration: 10000,
+    duration: 15000,
     onAction: () => worker.postMessage({ type: 'SKIP_WAITING' })
   });
 }
