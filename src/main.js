@@ -59,11 +59,11 @@ function setupServiceWorker() {
     logError('مرورگر از Service Worker پشتیبانی نمی‌کند.');
     return;
   }
-  window.addEventListener('load', async () => {
+
+  const doRegister = async () => {
     try {
       const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
 
-      // اگر قبلاً نسخه‌ای در انتظار بود، اطلاع بده
       if (reg.waiting && navigator.serviceWorker.controller) {
         notifyUpdateAvailable(reg.waiting);
       }
@@ -80,7 +80,6 @@ function setupServiceWorker() {
         });
       });
 
-      // خطای احتمالی هنگام ثبت
       reg.onerror = (e) => logError('خطای SW: ' + (e?.message || ''));
 
       let refreshing = false;
@@ -92,7 +91,14 @@ function setupServiceWorker() {
     } catch (e) {
       logError('ثبت SW ناموفق: ' + (e?.message || e));
     }
-  });
+  };
+
+  // اگر صفحه قبلاً کاملاً بارگذاری شده، فوراً ثبت کن؛ وگرنه منتظر load بمان.
+  if (document.readyState === 'complete') {
+    doRegister();
+  } else {
+    window.addEventListener('load', doRegister, { once: true });
+  }
 }
 
 function notifyUpdateAvailable(worker) {
@@ -106,6 +112,9 @@ function notifyUpdateAvailable(worker) {
 // ===== بخش ۵: راه‌اندازی =====
 async function bootstrap() {
   installGlobalErrorHandlers();
+
+  // SW را قبل از هر await دیگری شروع کن تا هیچوقت دیر نشود.
+  setupServiceWorker();
 
   try {
     const theme = await getSetting('theme');
@@ -143,8 +152,6 @@ async function bootstrap() {
   window.addEventListener('hashchange', navigate);
   if (!location.hash) location.hash = '#/home';
   await navigate();
-
-  setupServiceWorker();
 }
 
 bootstrap();
