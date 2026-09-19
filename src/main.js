@@ -16,9 +16,9 @@ import { renderHome, renderHistory, renderActivities, renderSettings, renderDev 
 
 // ===== بخش ۲: تم =====
 function applyTheme(theme) {
-  const resolved = theme === 'system' ?
-    (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') :
-    theme;
+  const resolved = theme === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : theme;
   document.documentElement.dataset.theme = resolved;
   document.documentElement.dataset.themeSetting = theme;
 }
@@ -55,23 +55,34 @@ async function navigate() {
 
 // ===== بخش ۴: Service Worker و به‌روزرسانی =====
 function setupServiceWorker() {
-  if (!('serviceWorker' in navigator)) return;
+  if (!('serviceWorker' in navigator)) {
+    logError('مرورگر از Service Worker پشتیبانی نمی‌کند.');
+    return;
+  }
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+
+      // اگر قبلاً نسخه‌ای در انتظار بود، اطلاع بده
+      if (reg.waiting && navigator.serviceWorker.controller) {
+        notifyUpdateAvailable(reg.waiting);
+      }
+
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
         if (!newWorker) return;
         newWorker.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            showToast('نسخه جدید آماده است.', {
-              actionLabel: 'به‌روزرسانی',
-              duration: 10000,
-              onAction: () => newWorker.postMessage({ type: 'SKIP_WAITING' })
-            });
+            notifyUpdateAvailable(newWorker);
+          } else if (newWorker.state === 'redundant') {
+            logError('SW نصب نشد (redundant). احتمالاً یک فایل در ASSETS موجود نیست.');
           }
         });
       });
+
+      // خطای احتمالی هنگام ثبت
+      reg.onerror = (e) => logError('خطای SW: ' + (e?.message || ''));
+
       let refreshing = false;
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         if (refreshing) return;
@@ -79,27 +90,35 @@ function setupServiceWorker() {
         location.reload();
       });
     } catch (e) {
-      logError(e);
+      logError('ثبت SW ناموفق: ' + (e?.message || e));
     }
+  });
+}
+
+function notifyUpdateAvailable(worker) {
+  showToast('نسخه جدید آماده است.', {
+    actionLabel: 'به‌روزرسانی',
+    duration: 10000,
+    onAction: () => worker.postMessage({ type: 'SKIP_WAITING' })
   });
 }
 
 // ===== بخش ۵: راه‌اندازی =====
 async function bootstrap() {
   installGlobalErrorHandlers();
-  
+
   try {
     const theme = await getSetting('theme');
     applyTheme(theme);
   } catch (_) {
     applyTheme('system');
   }
-  
+
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', async () => {
     const t = await getSetting('theme');
     if (t === 'system') applyTheme('system');
   });
-  
+
   try {
     await openDatabase();
   } catch (e) {
@@ -107,24 +126,24 @@ async function bootstrap() {
     showToast('خطا در باز کردن دیتابیس. آیا vendor/dexie.min.js وجود دارد؟');
     return;
   }
-  
+
   try {
     await runSeedIfNeeded();
   } catch (e) {
     logError(e);
   }
-  
+
   try {
     if (navigator.storage?.persist) {
       const ok = await navigator.storage.persist();
       await setSetting('storagePersisted', ok);
     }
   } catch (_) {}
-  
+
   window.addEventListener('hashchange', navigate);
   if (!location.hash) location.hash = '#/home';
   await navigate();
-  
+
   setupServiceWorker();
 }
 
