@@ -2,7 +2,7 @@
    فایل: sw.js
    فهرست:
      بخش ۱: ثابت‌ها
-     بخش ۲: نصب و precache
+     بخش ۲: نصب و precache (تحمل‌پذیر)
      بخش ۳: فعال‌سازی و حذف کش قدیمی
      بخش ۴: واکشی
      بخش ۵: پیام skipWaiting
@@ -28,10 +28,23 @@ const ASSETS = [
   './vendor/dexie.min.js'
 ];
 
-// ===== بخش ۲: نصب و precache =====
+// ===== بخش ۲: نصب و precache (تحمل‌پذیر) =====
+// هر فایل جدا کش می‌شود؛ اگر یکی نبود، نصب کل SW رد نمی‌شود.
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+    caches.open(CACHE_NAME).then(async (cache) => {
+      const failed = [];
+      for (const url of ASSETS) {
+        try {
+          await cache.add(new Request(url, { cache: 'reload' }));
+        } catch (e) {
+          failed.push(url);
+        }
+      }
+      if (failed.length) {
+        console.warn('[SW] فایل‌های کش‌نشده:', failed);
+      }
+    })
   );
 });
 
