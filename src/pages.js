@@ -207,8 +207,18 @@ async function refreshPersistStatus(container) {
 
 async function checkForUpdate() {
   try {
-    const reg = await navigator.serviceWorker.getRegistration();
-    if (!reg) { showToast('سرویس‌ورکر ثبت نشده.'); return; }
+    let reg = await navigator.serviceWorker.getRegistration();
+    if (!reg) {
+      // هنوز ثبت نشده؛ اینجا خودمان ثبت می‌کنیم.
+      try {
+        reg = await navigator.serviceWorker.register('./sw.js', { scope: './' });
+        showToast('سرویس‌ورکر تازه ثبت شد. یک لحظه صبر کن و دوباره بررسی کن.');
+        return;
+      } catch (e) {
+        showToast('ثبت سرویس‌ورکر ناموفق شد.');
+        return;
+      }
+    }
     await reg.update();
     showToast('بررسی به‌روزرسانی انجام شد.');
   } catch (_) {
