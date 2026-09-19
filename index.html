@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#1565C0" />
+  <title>دفتر زمان</title>
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+  <link rel="apple-touch-icon" href="./icons/icon.svg" />
+  <link rel="stylesheet" href="./src/styles.css" />
+</head>
+<body>
+  <main id="app" class="app"></main>
+
+  <nav id="bottom-nav" class="bottom-nav" aria-label="ناوبری">
+    <a href="#/home" data-route="home"><span class="nav-icon">🏠</span><span>خانه</span></a>
+    <a href="#/history" data-route="history"><span class="nav-icon">📅</span><span>امروز</span></a>
+    <a href="#/activities" data-route="activities"><span class="nav-icon">🎯</span><span>فعالیت‌ها</span></a>
+    <a href="#/settings" data-route="settings"><span class="nav-icon">⚙️</span><span>تنظیمات</span></a>
+  </nav>
+
+  <div id="toast-root"></div>
+  <div id="sheet-root"></div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>
