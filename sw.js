@@ -9,7 +9,7 @@
    ============================================================ */
 
 // ===== بخش ۱: ثابت‌ها =====
-const CACHE_NAME = 'dafter-zaman-v2';
+const CACHE_NAME = 'dafter-zaman-v3';
 const ASSETS = [
   './',
   './index.html',
