@@ -9,7 +9,7 @@
    ============================================================ */
 
 // ===== بخش ۱: ثابت‌ها =====
-const CACHE_NAME = 'dafter-zaman-v5';
+const CACHE_NAME = 'dafter-zaman-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -29,7 +29,6 @@ const ASSETS = [
 ];
 
 // ===== بخش ۲: نصب و precache (تحمل‌پذیر) =====
-// هر فایل جدا کش می‌شود؛ اگر یکی نبود، نصب کل SW رد نمی‌شود.
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then(async (cache) => {
@@ -63,6 +62,11 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
+
+  // درخواست‌های مربوط به خود sw.js نباید کش شوند.
+  const url = new URL(req.url);
+  if (url.pathname.endsWith('/sw.js')) return;
+
   event.respondWith(
     caches.match(req).then((cached) => {
       if (cached) return cached;
